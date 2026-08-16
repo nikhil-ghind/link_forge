@@ -1,0 +1,47 @@
+# --- PHP / Composer ---
+/vendor/
+composer.lock
+.phpunit.result.cache
+.phpunit.cache/
+
+# --- Laravel runtime ---
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+!/storage/**/.gitignore
+/public/storage
+/public/hot
+
+# --- Environment ---
+.env
+.env.*
+!.env.example
+auth.json
+
+# --- Node / dashboard ---
+node_modules/
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/
+dashboard/stats.html
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Local databases & dumps ---
+*.sqlite
+*.sqlite-journal
+database/database.sqlite
+*.sql.gz
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
