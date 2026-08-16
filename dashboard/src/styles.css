@@ -1,0 +1,503 @@
+/*
+ * Design tokens.
+ *
+ * Light is the base definition; the dark steps are declared twice — once under
+ * prefers-color-scheme for the OS setting, once under [data-theme="dark"] so
+ * the in-app toggle wins in both directions.
+ */
+:root {
+  color-scheme: light;
+
+  --surface-0: #f4f4f2;
+  --surface-1: #ffffff;
+  --surface-2: #fbfbfa;
+  --border: #e3e3df;
+  --grid: #ececE8;
+
+  --text-primary: #16161a;
+  --text-secondary: #52514e;
+  --text-muted: #77766f;
+
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+
+  --good: #1a7f4b;
+  --critical: #c23934;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgb(16 16 20 / 6%), 0 8px 24px -18px rgb(16 16 20 / 30%);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --surface-0: #121213;
+    --surface-1: #1a1a19;
+    --surface-2: #202020;
+    --border: #2e2e2c;
+    --grid: #2a2a28;
+
+    --text-primary: #f5f5f2;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8e8d84;
+
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+
+    --good: #3fa06b;
+    --critical: #e66767;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -18px rgb(0 0 0 / 70%);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --surface-0: #121213;
+  --surface-1: #1a1a19;
+  --surface-2: #202020;
+  --border: #2e2e2c;
+  --grid: #2a2a28;
+
+  --text-primary: #f5f5f2;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8e8d84;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+
+  --good: #3fa06b;
+  --critical: #e66767;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -18px rgb(0 0 0 / 70%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--surface-0);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--series-1);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ---------- layout ---------- */
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.brand span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nav a {
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.nav a.active {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.segmented button {
+  padding: 0.32rem 0.7rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+}
+
+input[type='text'],
+input[type='url'],
+input[type='number'],
+input[type='password'] {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
+}
+
+.btn {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.btn-primary {
+  background: var(--series-1);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn-danger {
+  color: var(--critical);
+}
+
+/* ---------- cards & tiles ---------- */
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin-bottom: 1.25rem;
+}
+
+.grid-halves {
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+}
+
+.card {
+  padding: 1.15rem 1.25rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.card-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tile-label {
+  font-size: 0.72rem;
+  font-weight: 550;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tile-value {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile-delta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.tile-delta .up {
+  color: var(--good);
+  font-weight: 600;
+}
+
+.tile-delta .down {
+  color: var(--critical);
+  font-weight: 600;
+}
+
+/* ---------- breakdown bars ---------- */
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem 0.75rem;
+  align-items: center;
+}
+
+.bar-label {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-value {
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.bar-track {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--series-1);
+}
+
+/* ---------- table ---------- */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th {
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
+td {
+  padding: 0.62rem 0.65rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 550;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.pill-on {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+}
+
+.pill-off {
+  color: var(--text-muted);
+}
+
+/* ---------- states ---------- */
+
+.state {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.state-error {
+  color: var(--critical);
+}
+
+.skeleton {
+  height: 240px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-0) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* ---------- tooltip ---------- */
+
+.tooltip {
+  padding: 0.5rem 0.65rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  font-size: 0.82rem;
+}
+
+.tooltip-label {
+  color: var(--text-muted);
+  margin-bottom: 0.15rem;
+}
+
+.tooltip-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- token gate ---------- */
+
+.gate {
+  max-width: 26rem;
+  margin: 12vh auto;
+  padding: 1.75rem;
+}
+
+.gate p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.gate form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.gate input {
+  flex: 1;
+}
