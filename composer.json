@@ -1,0 +1,58 @@
+{
+    "name": "nikhil-ghind/link-forge",
+    "type": "project",
+    "description": "LinkForge - high-throughput URL shortener on a LAMP stack with Redis-backed redirect resolution.",
+    "keywords": ["laravel", "url-shortener", "redis", "mysql", "analytics"],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "ext-redis": "*",
+        "ext-pdo": "*",
+        "laravel/framework": "^11.9",
+        "laravel/tinker": "^2.9",
+        "predis/predis": "^2.2"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.1",
+        "phpunit/phpunit": "^11.0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php artisan package:discover --ansi"
+        ],
+        "test": [
+            "@php artisan test"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
