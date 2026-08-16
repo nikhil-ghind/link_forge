@@ -1,0 +1,40 @@
+[Unit]
+Description=LinkForge queue worker (click drain + rollups)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+WorkingDirectory=/var/www/linkforge
+
+# --max-time recycles the process every hour: PHP long-running workers
+# accumulate memory, and a recycle also picks up newly deployed code.
+# --sleep=1 keeps drain latency low while the queue is idle.
+ExecStart=/usr/bin/php /var/www/linkforge/artisan queue:work redis \
+    --queue=clicks,default \
+    --sleep=1 \
+    --tries=3 \
+    --backoff=5 \
+    --max-time=3600 \
+    --memory=256
+
+Restart=always
+RestartSec=3
+
+# A worker that cannot reach Redis will exit repeatedly; do not let systemd
+# give up on it, because Redis coming back should self-heal the pipeline.
+StartLimitIntervalSec=0
+
+StandardOutput=append:/var/log/linkforge/worker.log
+StandardError=append:/var/log/linkforge/worker-error.log
+
+# The worker only needs to write logs and talk to the network.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

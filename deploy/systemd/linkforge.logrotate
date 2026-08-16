@@ -1,0 +1,24 @@
+# /etc/logrotate.d/linkforge
+/var/log/linkforge/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    su apache apache
+}
+
+/var/log/httpd/linkforge-*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /bin/systemctl reload httpd > /dev/null 2>&1 || true
+    endscript
+}

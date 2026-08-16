@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the LinkForge scheduler every minute
+
+[Timer]
+# The Laravel scheduler expects to be invoked once a minute and decides for
+# itself what is due. AccuracySec=1s keeps systemd from coalescing the tick.
+OnCalendar=*:0/1
+AccuracySec=1s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

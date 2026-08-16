@@ -1,0 +1,17 @@
+[Unit]
+Description=LinkForge scheduled tasks (one tick of the Laravel scheduler)
+
+[Service]
+Type=oneshot
+User=apache
+Group=apache
+WorkingDirectory=/var/www/linkforge
+ExecStart=/usr/bin/php /var/www/linkforge/artisan schedule:run
+
+StandardOutput=append:/var/log/linkforge/scheduler.log
+StandardError=append:/var/log/linkforge/scheduler-error.log
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
