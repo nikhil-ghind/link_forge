@@ -4,71 +4,16 @@ namespace Tests\Unit;
 
 use App\Models\Link;
 use App\Services\LinkCache;
-use App\Services\RedisLinkStore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Support\FakeLinkStore;
 use Tests\TestCase;
-
-/**
- * In-memory stand-in for the Redis link store so the cache-aside behaviour can
- * be asserted without a live Redis.
- */
-class ArrayLinkStore extends RedisLinkStore
-{
-    /** @var array<string, string> */
-    public array $data = [];
-
-    public int $reads = 0;
-
-    public int $writes = 0;
-
-    public function __construct()
-    {
-        parent::__construct('links');
-    }
-
-    public function get(string $key): ?string
-    {
-        $this->reads++;
-
-        return $this->data[$key] ?? null;
-    }
-
-    public function setex(string $key, int $ttl, string $value): void
-    {
-        $this->writes++;
-        $this->data[$key] = $value;
-    }
-
-    public function del(string ...$keys): void
-    {
-        foreach ($keys as $key) {
-            unset($this->data[$key]);
-        }
-    }
-
-    public function acquireLock(string $key, int $ttl): bool
-    {
-        if (isset($this->data[$key])) {
-            return false;
-        }
-
-        $this->data[$key] = '1';
-
-        return true;
-    }
-
-    public function releaseLock(string $key): void
-    {
-        unset($this->data[$key]);
-    }
-}
 
 class LinkCacheTest extends TestCase
 {
     use RefreshDatabase;
 
-    private ArrayLinkStore $store;
+    private FakeLinkStore $store;
 
     private LinkCache $cache;
 
@@ -76,7 +21,7 @@ class LinkCacheTest extends TestCase
     {
         parent::setUp();
 
-        $this->store = new ArrayLinkStore;
+        $this->store = new FakeLinkStore;
         $this->cache = new LinkCache($this->store);
     }
 

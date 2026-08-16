@@ -32,20 +32,21 @@ class ClickBuffer
         $date = gmdate('Y-m-d', $click->timestamp);
         $counterTtl = (int) config('linkforge.clicks.counter_ttl', 172_800);
 
+        $dayKey = $this->store->dailyClicksKey($click->linkId, $date);
+        $globalKey = $this->store->globalDailyClicksKey($date);
+
         try {
-            $this->store->pipeline(function ($pipe) use ($payload, $click, $date, $counterTtl) {
-                $pipe->rpush($this->store->bufferKey(), [$payload]);
-
-                $totalKey = $this->store->totalClicksKey($click->linkId);
-                $dayKey = $this->store->dailyClicksKey($click->linkId, $date);
-                $globalKey = $this->store->globalDailyClicksKey($date);
-
-                $pipe->incr($totalKey);
-                $pipe->incr($dayKey);
-                $pipe->expire($dayKey, $counterTtl);
-                $pipe->incr($globalKey);
-                $pipe->expire($globalKey, $counterTtl);
-            });
+            $this->store->pushClick(
+                payload: $payload,
+                counterKeys: [
+                    $this->store->totalClicksKey($click->linkId),
+                    $dayKey,
+                    $globalKey,
+                ],
+                // Per-day counters are only needed until the rollup catches up.
+                expiringKeys: [$dayKey, $globalKey],
+                ttl: $counterTtl,
+            );
         } catch (Throwable $e) {
             // Losing a click is strictly better than failing a redirect.
             Log::warning('linkforge.clicks.buffer_failed', [
@@ -68,23 +69,17 @@ class ClickBuffer
     public function drain(?int $limit = null): array
     {
         $limit ??= (int) config('linkforge.clicks.drain_batch', 2_000);
-        $key = $this->store->bufferKey();
 
-        $results = $this->store->connection()->transaction(function ($tx) use ($key, $limit) {
-            $tx->lrange($key, 0, $limit - 1);
-            $tx->ltrim($key, $limit, -1);
-        });
+        $raw = $this->store->drainBuffer($limit);
 
-        $raw = $results[0] ?? [];
-
-        if (! is_array($raw) || $raw === []) {
+        if ($raw === []) {
             return [];
         }
 
         $records = [];
 
         foreach ($raw as $entry) {
-            $record = ClickRecord::decode((string) $entry);
+            $record = ClickRecord::decode($entry);
 
             if ($record !== null) {
                 $records[] = $record;
@@ -96,7 +91,7 @@ class ClickBuffer
 
     public function depth(): int
     {
-        return (int) $this->store->connection()->llen($this->store->bufferKey());
+        return $this->store->bufferDepth();
     }
 
     /**
@@ -114,7 +109,7 @@ class ClickBuffer
         }
 
         $overflow = $depth - $max;
-        $this->store->connection()->ltrim($this->store->bufferKey(), $overflow, -1);
+        $this->store->trimBuffer($overflow);
 
         Log::warning('linkforge.clicks.buffer_overflow', ['dropped' => $overflow, 'depth' => $depth]);
 

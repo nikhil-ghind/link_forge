@@ -106,6 +106,67 @@ class RedisLinkStore
     }
 
     /**
+     * Hot-path click write: append the record to the buffer and bump the live
+     * counters, all in a single pipelined round-trip.
+     *
+     * @param  array<int, string>  $counterKeys  keys to INCR
+     * @param  array<int, string>  $expiringKeys subset of $counterKeys that should carry a TTL
+     */
+    public function pushClick(string $payload, array $counterKeys, array $expiringKeys, int $ttl): void
+    {
+        $bufferKey = $this->bufferKey();
+
+        $this->pipeline(function ($pipe) use ($payload, $bufferKey, $counterKeys, $expiringKeys, $ttl) {
+            $pipe->rpush($bufferKey, [$payload]);
+
+            foreach ($counterKeys as $key) {
+                $pipe->incr($key);
+            }
+
+            foreach ($expiringKeys as $key) {
+                $pipe->expire($key, $ttl);
+            }
+        });
+    }
+
+    /**
+     * Atomically take up to $limit records off the head of the click buffer.
+     *
+     * LRANGE + LTRIM in one MULTI means the records this call returns are the
+     * records it removed — no other worker can see them.
+     *
+     * @return array<int, string>
+     */
+    public function drainBuffer(int $limit): array
+    {
+        $key = $this->bufferKey();
+
+        $results = $this->connection()->transaction(function ($tx) use ($key, $limit) {
+            $tx->lrange($key, 0, $limit - 1);
+            $tx->ltrim($key, $limit, -1);
+        });
+
+        $raw = $results[0] ?? [];
+
+        return is_array($raw) ? array_map('strval', $raw) : [];
+    }
+
+    public function bufferDepth(): int
+    {
+        return (int) $this->connection()->llen($this->bufferKey());
+    }
+
+    /**
+     * Drop the oldest $count entries from the buffer.
+     */
+    public function trimBuffer(int $count): void
+    {
+        if ($count > 0) {
+            $this->connection()->ltrim($this->bufferKey(), $count, -1);
+        }
+    }
+
+    /**
      * @return array<int, string>
      */
     public function mget(array $keys): array
