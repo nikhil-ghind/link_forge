@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 380" width="880" height="380" role="img" aria-label="Animation of the redirect hot path returning a 302 from Redis while clicks buffer and drain asynchronously into MySQL">
+  <title>LinkForge: a 302 straight out of Redis while the click drains to MySQL later</title>
+
+  <text x="20" y="28" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#8b949e">The redirect hot path never waits on MySQL</text>
+  <text x="20" y="48" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">Top lane: every request is one Redis GET and a 302. Bottom lane: the click is buffered and drained in batches.</text>
+
+  <!-- hot lane -->
+  <rect x="30" y="100" width="110" height="64" rx="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="85" y="128" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">Visitor</text>
+  <text x="85" y="147" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">GET /{slug}</text>
+
+  <rect x="300" y="100" width="190" height="64" rx="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="395" y="124" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">LinkCache in Redis</text>
+  <text x="395" y="142" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">one GET, positional array</text>
+  <text x="395" y="158" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">negative cache, single flight, TTL jitter</text>
+
+  <path d="M 140 118 H 296" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 5" fill="none"/>
+  <path d="M 490 146 H 144" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 5" fill="none"/>
+  <path d="M 152 140 L 138 146 L 152 152 Z" fill="#3f9e6c"/>
+  <text x="218" y="112" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#6ea8fe">slug lookup</text>
+  <text x="300" y="180" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#3f9e6c">302 Location, Cache-Control private no-store</text>
+
+  <!-- request dots: out on the top line, back on the lower line -->
+  <circle r="7" fill="#6ea8fe">
+    <animateMotion path="M 140 118 H 300" dur="1.5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.35;0.45;1" keyPoints="0;1;1;1"/>
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.35;0.45;1" dur="1.5s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <circle r="7" fill="#6ea8fe">
+    <animateMotion path="M 140 118 H 300" dur="1.5s" begin="-0.5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.35;0.45;1" keyPoints="0;1;1;1"/>
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.35;0.45;1" dur="1.5s" begin="-0.5s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <circle r="7" fill="#6ea8fe">
+    <animateMotion path="M 140 118 H 300" dur="1.5s" begin="-1s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.35;0.45;1" keyPoints="0;1;1;1"/>
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.35;0.45;1" dur="1.5s" begin="-1s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+
+  <circle r="7" fill="#3f9e6c">
+    <animateMotion path="M 490 146 H 144" dur="1.5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;0.85;1" keyPoints="0;0;1;1"/>
+    <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.45;0.86;1" dur="1.5s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <circle r="7" fill="#3f9e6c">
+    <animateMotion path="M 490 146 H 144" dur="1.5s" begin="-0.5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;0.85;1" keyPoints="0;0;1;1"/>
+    <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.45;0.86;1" dur="1.5s" begin="-0.5s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- click drop into the buffer -->
+  <circle r="5" fill="#c9922f">
+    <animateMotion path="M 395 168 V 236" dur="1.5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;0.8;1" keyPoints="0;0;1;1"/>
+    <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.45;0.81;1" dur="1.5s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#c9922f">
+    <animateMotion path="M 395 168 V 236" dur="1.5s" begin="-0.75s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;0.8;1" keyPoints="0;0;1;1"/>
+    <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.45;0.81;1" dur="1.5s" begin="-0.75s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <text x="404" y="204" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#c9922f">RPUSH + INCR, one pipelined round trip</text>
+
+  <!-- click buffer -->
+  <rect x="300" y="236" width="190" height="90" rx="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="395" y="256" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">Redis click buffer</text>
+  <rect x="312" y="240" width="166" height="0" fill="#c9922f" opacity="0.8">
+    <animate attributeName="height" values="0;78;0;0" keyTimes="0;0.75;0.78;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="322;244;322;322" keyTimes="0;0.75;0.78;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="395" y="344" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">trimmed if it exceeds max_buffer</text>
+
+  <!-- worker -->
+  <rect x="560" y="236" width="150" height="64" rx="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="635" y="260" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">Drain worker</text>
+  <text x="635" y="278" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">LRANGE + LTRIM</text>
+  <text x="635" y="293" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">in one MULTI</text>
+
+  <!-- mysql -->
+  <rect x="750" y="236" width="110" height="64" rx="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+  <text x="805" y="262" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#8b949e">MySQL</text>
+  <text x="805" y="280" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#8b949e">click_events</text>
+
+  <path d="M 490 268 H 556" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 5" fill="none"/>
+  <path d="M 710 268 H 746" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 5" fill="none"/>
+
+  <!-- the batch travelling to MySQL -->
+  <g>
+    <rect x="-26" y="-11" width="52" height="22" rx="4" fill="#c9922f" stroke="#e8c98a" stroke-width="1"/>
+    <text x="0" y="4" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#f0f6fc">batch</text>
+    <animateMotion path="M 500 268 H 780" dur="12s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.75;0.95;1" keyPoints="0;0;1;1"/>
+    <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.75;0.96;1" dur="12s" calcMode="discrete" repeatCount="indefinite"/>
+  </g>
+  <text x="560" y="326" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#c9922f">enrich, then bulk INSERT 500 rows per statement</text>
+
+  <text x="20" y="370" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#8b949e">At-most-once by design: a worker that dies mid-batch loses that batch, and the Redis counters stay authoritative for live totals.</text>
+</svg>

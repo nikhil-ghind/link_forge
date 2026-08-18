@@ -134,15 +134,8 @@ to re-target. `Cache-Control: private, no-store` is set to match.
 
 ## Click tracking without blocking
 
-```
-request  ──►  RPUSH buffer + INCR total + INCR day + INCR global   (1 pipelined round-trip)
-                                    │
-worker   ◄──────────── LRANGE + LTRIM (one MULTI) ─────────────────┘
-             │
-             ├─ enrich: UA → device/browser/os, referrer → host, edge header → country
-             ├─ bulk INSERT into click_events, 500 rows per statement
-             └─ one UPDATE per link for the denormalised counters
-```
+<img src="docs/redirect-hot-path.svg" alt="Animated redirect hot path: a 302 served from Redis while the click is buffered and drained into MySQL in batches" width="880">
+
 
 The request captures only cheap header reads. All parsing is deferred to the
 worker. At 5,000 clicks/second that is ~10 multi-row inserts per second instead
